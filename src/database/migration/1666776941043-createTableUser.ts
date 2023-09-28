@@ -1,5 +1,7 @@
 import { MigrationInterface, QueryRunner, Table, TableIndex } from 'typeorm'
 
+import { UserRole, Gender } from '@constants'
+
 export class createTableUser1666776941043 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.createTable(
@@ -15,7 +17,8 @@ export class createTableUser1666776941043 implements MigrationInterface {
           },
           {
             name: 'username',
-            type: 'varchar'
+            type: 'varchar',
+            isUnique: true
           },
           {
             name: 'password',
@@ -27,10 +30,53 @@ export class createTableUser1666776941043 implements MigrationInterface {
           },
           {
             name: 'phone_number',
-            type: 'varchar'
+            type: 'varchar',
+            isUnique: true
+          },
+          {
+            name: 'role',
+            type: 'enum',
+            enum: [UserRole.Admin, UserRole.Coach, UserRole.User],
+            default: `'${UserRole.User}'`
+          },
+          {
+            name: 'level',
+            type: 'int',
+            default: 1
           },
           {
             name: 'avatar',
+            type: 'varchar',
+            isNullable: true
+          },
+          {
+            name: 'thumbnail',
+            type: 'varchar',
+            isNullable: true
+          },
+          {
+            name: 'gender',
+            type: 'enum',
+            enum: [Gender.MALE, Gender.FEMALE, Gender.OTHER],
+            isNullable: true
+          },
+          {
+            name: 'address',
+            type: 'varchar',
+            isNullable: true
+          },
+          {
+            name: 'description',
+            type: 'text',
+            isNullable: true
+          },
+          {
+            name: 'emergency',
+            type: 'varchar',
+            isNullable: true
+          },
+          {
+            name: 'technique',
             type: 'varchar',
             isNullable: true
           },
@@ -55,7 +101,6 @@ export class createTableUser1666776941043 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropIndex('user', 'IDX_USERNAME')
     await queryRunner.dropTable('user')
   }
 }

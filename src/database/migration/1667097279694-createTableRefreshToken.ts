@@ -26,11 +26,13 @@ export class createTableRefreshToken1667097279694
           },
           {
             name: 'refresh_token',
-            type: 'varchar'
+            type: 'varchar',
+            isUnique: true
           },
           {
             name: 'expire_at',
-            type: 'timestamp'
+            type: 'timestamp',
+            isNullable: true
           },
           {
             name: 'created_at',
@@ -57,11 +59,6 @@ export class createTableRefreshToken1667097279694
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    const table = await queryRunner.getTable('refresh_token')
-    const foreignKey = table.foreignKeys.find(
-      (fk) => fk.columnNames.indexOf('user_id') !== -1
-    )
-    await queryRunner.dropForeignKey('refresh_token', foreignKey)
     await queryRunner.dropTable('refresh_token')
   }
 }

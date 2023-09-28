@@ -6,42 +6,80 @@ import {
   Put,
   Param,
   Delete,
-  Request
+  UseGuards,
+  Query,
+  Request,
+  ForbiddenException
 } from '@nestjs/common'
-import { ApiTags, ApiBearerAuth } from '@nestjs/swagger'
-import { UseGuards } from '@nestjs/common'
+import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 
-import { CreateUserDto, UpdateUserDto } from '@models/user'
+import {
+  CreateUserDto,
+  UpdateProfileDto,
+  GroupUserDto,
+  CreateCoachDto,
+  CoachUserDto
+} from '@models/user'
 import { UserService } from './user.service'
-import { AuthenticationGuard } from '@auth'
+import { AuthenticationGuard, Roles, RolesGuard } from '@models/auth'
+import { UserRole } from '@constants'
+import { AuthRequest } from '@common/interface'
 
 @ApiTags('user')
+@ApiBearerAuth()
+@UseGuards(AuthenticationGuard)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiOperation({ summary: 'Create User', description: 'Admin Only' })
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto)
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll()
+  @ApiOperation({ summary: 'Create Coach', description: 'Admin Only' })
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
+  @Post('coach')
+  createCoach(@Body() createCoachDto: CreateCoachDto) {
+    return this.userService.create(createCoachDto)
   }
 
-  @ApiBearerAuth()
-  @UseGuards(AuthenticationGuard)
+  @ApiOperation({ summary: 'Get List User', description: 'Admin Only' })
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
+  @Get()
+  findAllByGroup(@Query() pageOptionsDto: GroupUserDto) {
+    return this.userService.findAllUser(pageOptionsDto)
+  }
+
+  @ApiOperation({ summary: 'Get List Coach', description: 'Admin Only' })
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
+  @Get('coach')
+  findAllCoach(@Query() pageOptionsDto: CoachUserDto) {
+    return this.userService.findAllCoach(pageOptionsDto)
+  }
+
+  @ApiOperation({ summary: 'Get User' })
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.userService.findOne(id)
   }
 
-  @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  @ApiOperation({ summary: 'Update Profile' })
+  @Put()
+  update(@Body() updateUserDto: UpdateProfileDto, @Request() req: AuthRequest) {
+    const { id } = req.user
     return this.userService.update(id, updateUserDto)
   }
 
+  @ApiOperation({ summary: 'Delete User', description: 'Admin Only' })
+  @Roles(UserRole.Admin)
+  @UseGuards(RolesGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(id)
